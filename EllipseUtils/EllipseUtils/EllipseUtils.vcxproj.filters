@@ -24,6 +24,12 @@
     <ClInclude Include="ellipseParameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc_eigen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ellipseUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
