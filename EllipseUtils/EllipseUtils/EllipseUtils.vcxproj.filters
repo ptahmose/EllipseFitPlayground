@@ -30,12 +30,18 @@
     <ClInclude Include="ellipseUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="testcases.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EllipseUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="testcases.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

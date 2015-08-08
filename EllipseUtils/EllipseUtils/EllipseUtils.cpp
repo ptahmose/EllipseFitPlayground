@@ -4,32 +4,43 @@
 #include "stdafx.h"
 #include "ellipseParameters.h"
 #include "ellipseUtils.h"
+#include "testcases.h"
 
 using namespace EllipseUtils;
 
-void TestEllipseFrom5Points()
+static bool IsResultOk(const EllipseFrom5PointsTestCases::TestParameters* ptrTestData, EllipseParameters<double>& ellParams)
 {
-	static const struct TestParameters
+	const double MaxError = 1e-5;
+	if (relativeDifference(ptrTestData->result_x0, ellParams.x0) < MaxError && relativeDifference(ptrTestData->result_y0, ellParams.y0) < MaxError &&
+		relativeDifference(ptrTestData->result_a, ellParams.a) < MaxError && relativeDifference(ptrTestData->result_b, ellParams.b) < MaxError)
 	{
-		double points[10];
-
-	} TestCases[] =
-	{
+		if (relativeDifference(ptrTestData->result_theta, ellParams.theta) < MaxError ||
+			relativeDifference(ptrTestData->result_theta +  M_PI, ellParams.theta) < MaxError ||
+			relativeDifference(ptrTestData->result_theta -  M_PI, ellParams.theta) < MaxError)
 		{
-			{
-			1408.2722735486361, 490.64057378265801, 1251.1773322832571, 97.576251945392670,	1135.6035395146628,
-			921.82905982385944, 1399.5187486964699, 559.41979612991645, 1373.2789494361668, 266.81596353596143
-			}
+			return true;
 		}
-	};
+	}
 
-	for (int i = 0; i < sizeof(TestCases) / sizeof(TestCases[0]); ++i)
+	return false;
+}
+
+static void TestEllipseFrom5Points()
+{
+	for (int i = 0; ; ++i)
 	{
-		const TestParameters* pTestData = TestCases + i;
+		const EllipseFrom5PointsTestCases::TestParameters* pTestData = EllipseFrom5PointsTestCases::GetTestCase(i);
+		if (pTestData == nullptr)
+		{
+			break;
+		}
+
 		EllipseAlgebraicParameters<double> ellAlg = EllipseAlgebraicParameters<double>::CreateFrom5Points(pTestData->points);
 		EllipseParameters<double> ellParams = EllipseParameters<double>::FromAlgebraicParameters(ellAlg);
 
-		printf("x0=%lf y0=%lf a=%lf b=%lf angle=%lf", ellParams.x0, ellParams.y0, ellParams.a, ellParams.b, radToDegree(ellParams.theta));
+		bool isOk = IsResultOk(pTestData, ellParams);
+
+		printf("x0=%lf y0=%lf a=%lf b=%lf angle=%lf <- %s\n", ellParams.x0, ellParams.y0, ellParams.a, ellParams.b, radToDegree(ellParams.theta), isOk ? "OK" : "FAIL");
 	}
 }
 
