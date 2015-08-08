@@ -2,6 +2,8 @@
 //
 
 #include "stdafx.h"
+#include "optionparser.h"
+#include <iostream>
 #include "ellipseParameters.h"
 #include "ellipseUtils.h"
 #include "testcases.h"
@@ -25,8 +27,9 @@ static bool IsResultOk(const EllipseFrom5PointsTestCases::TestParameters* ptrTes
 	return false;
 }
 
-static void TestEllipseFrom5Points()
+static bool TestEllipseFrom5Points()
 {
+	bool allOk = true;
 	for (int i = 0; ; ++i)
 	{
 		const EllipseFrom5PointsTestCases::TestParameters* pTestData = EllipseFrom5PointsTestCases::GetTestCase(i);
@@ -41,11 +44,63 @@ static void TestEllipseFrom5Points()
 		bool isOk = IsResultOk(pTestData, ellParams);
 
 		printf("x0=%lf y0=%lf a=%lf b=%lf angle=%lf <- %s\n", ellParams.x0, ellParams.y0, ellParams.a, ellParams.b, radToDegree(ellParams.theta), isOk ? "OK" : "FAIL");
+
+		if (!isOk)
+		{
+			allOk = false;
+		}
 	}
+
+	return allOk;
 }
 
-int main()
+static const char* _5POINTTESTOPTION = "5pointtest";
+
+static option::ArgStatus CommandArgRequired(const option::Option& option, bool msg)
 {
+	if (option.arg != 0)
+	{
+		if (strcmp(option.arg, _5POINTTESTOPTION) == 0)
+		{
+			return option::ARG_OK;
+		}
+	}
+
+	return option::ARG_ILLEGAL;
+}
+
+enum  optionIndex { UNKNOWN, HELP, COMMAND, SVGOUTPUT};
+const option::Descriptor usage[] =
+{
+	{ UNKNOWN, 0,"" , ""    ,option::Arg::None, "USAGE: example [options]\n\n"
+	"Options:" },
+	{ HELP,    0,"" , "help",option::Arg::None, "  --help  \tPrint usage and exit." },
+	{ COMMAND,    0,"c", "command",CommandArgRequired, "  --command, -c  \tspecifies command." },
+	{ SVGOUTPUT,  0,"s" ,  "svg"   ,option::Arg::None, "  --svg, -s  \tspecifies filename for SVG-output." },
+	{ 0,0,0,0,0,0 }
+};
+
+int main(int argc, char* argv[])
+{
+	argc -= (argc>0); argv += (argc>0); // skip program name argv[0] if present
+	option::Stats  stats(usage, argc, argv);
+	auto options = std::vector<option::Option>(stats.options_max);
+	options.resize(stats.options_max);
+	auto  buffer = std::vector<option::Option>(stats.buffer_max);
+	buffer.resize(stats.buffer_max);
+	option::Parser parse(usage, argc, argv, options.data(), buffer.data());
+
+	if (!options[COMMAND])
+	{
+		return EXIT_FAILURE;
+	}
+
+	const char* command = options[COMMAND].arg;
+	if (strcmp(command, _5POINTTESTOPTION) == 0)
+	{
+
+	}
+
 	TestEllipseFrom5Points();
 	return 0;
 }

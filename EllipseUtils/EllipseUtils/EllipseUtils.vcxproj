@@ -145,9 +145,11 @@
     <ClInclude Include="ellipseParameters.h" />
     <ClInclude Include="ellipseUtils.h" />
     <ClInclude Include="inc_eigen.h" />
+    <ClInclude Include="optionparser.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="testcases.h" />
+    <ClInclude Include="writeSVG.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EllipseUtils.cpp" />
@@ -158,6 +160,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="testcases.cpp" />
+    <ClCompile Include="writeSVG.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

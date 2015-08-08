@@ -12,7 +12,8 @@
 
 #include <stdio.h>
 #include <tchar.h>
-
+#include <memory>
+#include <vector>
 
 
 // TODO: reference additional headers your program requires here

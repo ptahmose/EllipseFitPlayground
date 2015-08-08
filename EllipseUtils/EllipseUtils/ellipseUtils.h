@@ -15,4 +15,3 @@ namespace EllipseUtils
 	}
 }
 
-void TestEllipseFrom5Points();

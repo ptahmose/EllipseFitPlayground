@@ -33,6 +33,12 @@
     <ClInclude Include="testcases.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="writeSVG.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="optionparser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="testcases.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="writeSVG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
