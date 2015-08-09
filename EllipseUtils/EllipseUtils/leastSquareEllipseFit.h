@@ -12,10 +12,10 @@ namespace EllipseUtils
 		class PointAccessorFromTwoVectors
 		{
 		private:
-			const std::vector<double>& pointsX;
-			const std::vector<double>& pointsY;
+			const std::vector<tFloat>& pointsX;
+			const std::vector<tFloat>& pointsY;
 		public:
-			PointAccessorFromTwoVectors(const std::vector<double>& pointsX, const std::vector<double>& pointsY)
+			PointAccessorFromTwoVectors(const std::vector<tFloat>& pointsX, const std::vector<tFloat>& pointsY)
 				: pointsX(pointsX), pointsY(pointsY)
 			{}
 
@@ -24,12 +24,12 @@ namespace EllipseUtils
 				return this->pointsX.size();
 			}
 
-			double GetX(size_t index) const
+			tFloat GetX(size_t index) const
 			{
 				return this->pointsX[index];
 			}
 
-			double GetY(size_t index) const
+			tFloat GetY(size_t index) const
 			{
 				return this->pointsY[index];
 			}
@@ -39,7 +39,7 @@ namespace EllipseUtils
 		static EllipseAlgebraicParameters<tFloat> Fit(const PointAccessor& ptAccessor)
 		{
 			auto numOfPoints = ptAccessor.GetLength();
-			double mx, my; double minX, minY, maxX, maxY;
+			tFloat mx, my; tFloat minX, minY, maxX, maxY;
 			CalcMeanMinMax([&](int index)->tFloat {return ptAccessor.GetX(index); }, ptAccessor.GetLength(), mx, minX, maxX);
 			CalcMeanMinMax([&](int index)->tFloat {return ptAccessor.GetY(index); }, ptAccessor.GetLength(), my, minY, maxY);
 			tFloat sx = (maxX - minX) / 2;
@@ -48,7 +48,7 @@ namespace EllipseUtils
 			tFloat* designM = (tFloat*)malloc(numOfPoints * 6 * sizeof(tFloat));
 			for (size_t i = 0; i < numOfPoints; ++i)
 			{
-				tFloat x = ptAccessor.GetX(i); double y = ptAccessor.GetY(i);
+				tFloat x = ptAccessor.GetX(i); tFloat y = ptAccessor.GetY(i);
 				x = (x - mx) / sx;
 				y = (y - my) / sy;
 				designM[i * 6 + 0] = x*x;
@@ -59,7 +59,7 @@ namespace EllipseUtils
 				designM[i * 6 + 5] = 1;
 			}
 
-			tFloat* scatterM = (double*)malloc(6 * 6 * sizeof(tFloat));
+			tFloat* scatterM = (tFloat*)malloc(6 * 6 * sizeof(tFloat));
 			for (int r = 0; r < 6; ++r)
 			{
 				for (int c = 0; c < 6; ++c)
@@ -131,8 +131,8 @@ namespace EllipseUtils
 	private:
 		static void CalcMeanMinMax(const std::function<tFloat(int)> getVal, size_t count, tFloat& mean, tFloat& min, tFloat& max)
 		{
-			min = (std::numeric_limits<double>::max)();
-			max = (std::numeric_limits<double>::min)();
+			min = (std::numeric_limits<tFloat>::max)();
+			max = (std::numeric_limits<tFloat>::min)();
 			mean = 0;
 
 			for (size_t i = 0; i < count; ++i)
