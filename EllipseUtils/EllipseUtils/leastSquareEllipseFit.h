@@ -73,7 +73,6 @@ namespace EllipseUtils
 			tFloat sx = (maxX - minX) / 2;
 			tFloat sy = (maxY - minY) / 2;
 
-			//tFloat* scatterM = (tFloat*)malloc(6 * 6 * sizeof(tFloat));
 			tFloat scatterM[6 * 6];
 			for (int r = 0; r < 6; ++r)
 			{
@@ -94,11 +93,9 @@ namespace EllipseUtils
 				}
 			}
 
-			//tFloat* tmpBtimestmpE = (tFloat*)malloc(3 * 3 * sizeof(tFloat));
 			tFloat tmpBtimestmpE[3 * 3];
 			CalcTmpBtimesTmpE(scatterM + 3, 6 * sizeof(tFloat), scatterM + (3 * 6) + 3, 6 * sizeof(tFloat), tmpBtimestmpE);
 
-			//tFloat* testA = (tFloat*)malloc(3 * 3 * sizeof(tFloat));
 			tFloat testA[3*3];
 			CalcTestA(scatterM, 6 * sizeof(tFloat), scatterM + 3, 6 * sizeof(tFloat), scatterM + (3 * 6) + 3, 6 * sizeof(tFloat), testA);
 
@@ -154,7 +151,7 @@ namespace EllipseUtils
 			switch (col)
 			{
 			case 0:return x*x;
-			case 1:return 2*x*y;
+			case 1:return x*y;
 			case 2:return y*y;
 			case 3:return x;
 			case 4:return y;
