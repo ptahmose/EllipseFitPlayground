@@ -14,6 +14,10 @@
 #include <tchar.h>
 #include <memory>
 #include <vector>
+#include <functional>
+#include <limits>
+#include <algorithm>  
+#include <string>
 
 
 // TODO: reference additional headers your program requires here
