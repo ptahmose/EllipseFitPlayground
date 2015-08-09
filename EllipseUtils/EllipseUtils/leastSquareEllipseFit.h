@@ -42,8 +42,8 @@ namespace EllipseUtils
 			const double* ptrY;
 			size_t count;
 		public:
-			PointAccessorFromTwoArrays(const double* ptrX, const double* ptrY,size_t count)
-				: ptrX(ptrX),ptrY(ptrY),count(count)
+			PointAccessorFromTwoArrays(const double* ptrX, const double* ptrY, size_t count)
+				: ptrX(ptrX), ptrY(ptrY), count(count)
 			{}
 
 
@@ -73,21 +73,8 @@ namespace EllipseUtils
 			tFloat sx = (maxX - minX) / 2;
 			tFloat sy = (maxY - minY) / 2;
 
-			tFloat* designM = (tFloat*)malloc(numOfPoints * 6 * sizeof(tFloat));
-			for (size_t i = 0; i < numOfPoints; ++i)
-			{
-				tFloat x = ptAccessor.GetX(i); tFloat y = ptAccessor.GetY(i);
-				x = (x - mx) / sx;
-				y = (y - my) / sy;
-				designM[i * 6 + 0] = x*x;
-				designM[i * 6 + 1] = x*y;
-				designM[i * 6 + 2] = y*y;
-				designM[i * 6 + 3] = x;
-				designM[i * 6 + 4] = y;
-				designM[i * 6 + 5] = 1;
-			}
-
-			tFloat* scatterM = (tFloat*)malloc(6 * 6 * sizeof(tFloat));
+			//tFloat* scatterM = (tFloat*)malloc(6 * 6 * sizeof(tFloat));
+			tFloat scatterM[6 * 6];
 			for (int r = 0; r < 6; ++r)
 			{
 				for (int c = 0; c < 6; ++c)
@@ -95,8 +82,11 @@ namespace EllipseUtils
 					tFloat v = 0;
 					for (size_t k = 0; k < numOfPoints; ++k)
 					{
-						tFloat v1 = designM[k * 6 + r];
-						tFloat v2 = designM[c + k * 6];
+						tFloat x = ptAccessor.GetX(k); tFloat y = ptAccessor.GetY(k);
+						x = (x - mx) / sx;
+						y = (y - my) / sy;
+						tFloat v1 = CalcDesignMatrixValue(r, x, y);
+						tFloat v2 = CalcDesignMatrixValue(c, x, y);
 						v += v1*v2;
 					}
 
@@ -104,10 +94,12 @@ namespace EllipseUtils
 				}
 			}
 
-			tFloat* tmpBtimestmpE = (tFloat*)malloc(3 * 3 * sizeof(tFloat));
+			//tFloat* tmpBtimestmpE = (tFloat*)malloc(3 * 3 * sizeof(tFloat));
+			tFloat tmpBtimestmpE[3 * 3];
 			CalcTmpBtimesTmpE(scatterM + 3, 6 * sizeof(tFloat), scatterM + (3 * 6) + 3, 6 * sizeof(tFloat), tmpBtimestmpE);
 
-			tFloat* testA = (tFloat*)malloc(3 * 3 * sizeof(tFloat));
+			//tFloat* testA = (tFloat*)malloc(3 * 3 * sizeof(tFloat));
+			tFloat testA[3*3];
 			CalcTestA(scatterM, 6 * sizeof(tFloat), scatterM + 3, 6 * sizeof(tFloat), scatterM + (3 * 6) + 3, 6 * sizeof(tFloat), testA);
 
 			Eigen::EigenSolver<Eigen::Matrix<tFloat, 3, 3>> eigenSolver;
@@ -151,12 +143,70 @@ namespace EllipseUtils
 			params.d = -2 * A[0] * sy*sy*mx - A[1] * sx*sy*my + A[3] * sx*sy*sy;
 			params.e = -A[1] * sx*sy*mx - 2 * A[2] * sx*sx*my + A[4] * sx*sx*sy;
 			params.f = A[0] * sy*sy*mx*mx + A[1] * sx*sy*mx*my + A[2] * sx*sx*my*my
-							- A[3] * sx*sy*sy*mx - A[4] * sx*sx*sy*my
-							+ A[5] * sx*sx*sy*sy;
+						- A[3] * sx*sy*sy*mx - A[4] * sx*sx*sy*my
+						+ A[5] * sx*sx*sy*sy;
 			return params;
 		}
 
 	private:
+		static tFloat CalcDesignMatrixValue(int col,tFloat x, tFloat y)
+		{
+			switch (col)
+			{
+			case 0:return x*x;
+			case 1:return 2*x*y;
+			case 2:return y*y;
+			case 3:return x;
+			case 4:return y;
+			case 5:return 1;
+			}
+
+			throw std::logic_error("Only expecting col to be in the range 0 to 5.");
+		}
+
+		/*template <typename PointAccessor>
+		static tFloat CalcDesignMatrixValue(size_t col, size_t row, tFloat mx, tFloat my, tFloat sx, tFloat sy, const PointAccessor& ptAccessor)
+		{
+			switch (col)
+			{
+			case 0:
+			{
+				tFloat x = ptAccessor.GetX(row);
+				x = (x - mx) / sx;
+				return x*x;
+			}
+			case 1:
+			{
+				tFloat x = ptAccessor.GetX(row); tFloat y = ptAccessor.GetY(row);
+				x = (x - mx) / sx;
+				y = (y - my) / sy;
+				return x*y;
+			}
+			case 2:
+			{
+				tFloat y = ptAccessor.GetY(row);
+				y = (y - my) / sy;
+				return y*y;
+			}
+			case 3:
+			{
+				tFloat x = ptAccessor.GetX(row);
+				x = (x - mx) / sx;
+				return x;
+			}
+			case 4:
+			{
+				tFloat y = ptAccessor.GetY(row);
+				y = (y - my) / sy;
+				return y;
+			}
+			case 5:
+				return 1;
+			}
+
+			throw std::logic_error("Only expecting col to be in the range 0 to 5.");
+		}*/
+
 		static void CalcMeanMinMax(const std::function<tFloat(int)> getVal, size_t count, tFloat& mean, tFloat& min, tFloat& max)
 		{
 			min = (std::numeric_limits<tFloat>::max)();
@@ -280,7 +330,7 @@ namespace EllipseUtils
 #undef b
 #undef a
 		}
-		
+
 		static void CalcLowerHalf(const tFloat* pB, int strideB, const tFloat* pC, int strideC, const tFloat* ptrAUpperHalf, tFloat* ptrDest)
 		{
 #define b(r,c) *((tFloat*)(((char*)pB)+(r-1)*strideB+(c-1)*sizeof(tFloat)))
