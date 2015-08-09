@@ -39,6 +39,9 @@
     <ClInclude Include="optionparser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="leastSquareEllipseFit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="writeSVG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="leastSquareEllipseFit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

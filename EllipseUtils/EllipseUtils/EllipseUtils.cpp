@@ -7,6 +7,7 @@
 #include "ellipseParameters.h"
 #include "ellipseUtils.h"
 #include "testcases.h"
+#include "leastSquareEllipseFit.h"
 #include "writeSVG.h"
 
 using namespace EllipseUtils;
@@ -32,13 +33,26 @@ static std::string GenerateFilenameForSvg(const char* szFilename, int i)
 {
 	// find the last dot
 	const char* lastdot = strrchr(szFilename, '.');
-	std::string str;
-	str.append(szFilename, lastdot - szFilename);
-	char sz[20];
-	_itoa_s(i, sz, 10);
-	str.append(sz);
-	str.append(lastdot);
-	return str;
+	std::string name;
+	if (lastdot != nullptr)
+	{
+		if (_stricmp(lastdot + 1, "svg") == 0)
+		{
+			name.append(szFilename, lastdot - szFilename);
+		}
+		else
+		{
+			name.append(szFilename);
+		}
+	}
+	else
+	{
+		name.append(szFilename);
+	}
+
+	std::ostringstream oss;
+	oss << name << i << ".svg";
+	return oss.str();
 }
 
 static bool TestEllipseFrom5Points(const char* szFilename)
@@ -90,13 +104,26 @@ static bool TestEllipseFrom5Points(const char* szFilename)
 	return allOk;
 }
 
+
+static void TestLeastSquareFit()
+{
+	std::vector<double> posX{ 1191.890202, 1202.992439, 1251.177332, 1290.494167, 1316.046031, 1330.852813, 1352.380307, 1373.278949, 1365.819934, 1390.200345, 1396.257962, 1405.251032, 1408.272274, 1399.518749, 1375.738192, 1354.890642, 1344.181910, 1329.239047, 1291.598685, 1272.002922, 1236.409267, 1193.330425, 1135.603540, 1124.718146, 1058.339563, 1014.500301, 989.403974, 891.826663, 848.007368 };
+	std::vector<double> posY{ 56.850882, 63.318848, 97.576252, 138.239738, 169.077405, 194.235056, 230.361399, 266.815964, 315.499247, 325.761950, 335.514097, 398.074500, 490.640574, 559.419796, 633.170436, 687.140494, 709.254771, 730.149767, 783.886493, 811.988798, 850.083598, 883.423782, 921.829060, 930.230122, 953.948848, 962.635142, 965.784117, 971.813619, 963.767163 };
+	
+	LeastSquareEllipseFitter<double>::PointAccessorFromTwoVectors accessor(posX, posY);
+	auto result = LeastSquareEllipseFitter<double>::Fit(accessor);
+}
+
+
 static const char* _5POINTTESTOPTION = "5pointtest";
+static const char* LEASTSQUAREELLIPSETESTOPTION = "leastsquarefit";
 
 static option::ArgStatus CommandArgRequired(const option::Option& option, bool msg)
 {
 	if (option.arg != 0)
 	{
-		if (strcmp(option.arg, _5POINTTESTOPTION) == 0)
+		if (strcmp(option.arg, _5POINTTESTOPTION) == 0 ||
+			strcmp(option.arg, LEASTSQUAREELLIPSETESTOPTION) == 0)
 		{
 			return option::ARG_OK;
 		}
@@ -151,6 +178,10 @@ int main(int argc, char* argv[])
 		}
 
 		TestEllipseFrom5Points(filename);
+	}
+	else if (strcmp(command, LEASTSQUAREELLIPSETESTOPTION) == 0)
+	{
+		TestLeastSquareFit();
 	}
 
 
