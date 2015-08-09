@@ -9,9 +9,26 @@ public:
 		double result_x0, result_y0, result_a, result_b, result_theta;
 	};
 
-	static TestParameters*	GetTestCase(int i);
+	static const TestParameters*	GetTestCase(int i);
 
 private:
 	static TestParameters tests[];
 
+};
+
+class EllipseLeastSquareFitTestCases
+{
+public:
+	struct TestCase
+	{
+		const double* pX;
+		const double* pY;
+		int		      count;
+
+		double result_x0, result_y0, result_a, result_b, result_theta;
+	};
+
+	static const TestCase*	GetTestCase(int i);
+private:
+	static TestCase tests[];
 };

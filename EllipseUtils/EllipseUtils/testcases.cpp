@@ -82,7 +82,7 @@ EllipseFrom5PointsTestCases::TestParameters EllipseFrom5PointsTestCases::tests[]
 	{ { 1251.177332,97.576252,1365.819934,315.499247,1193.330425,883.423782,1344.181910,709.254771,1354.890642,687.140494 },387.563387,297.482220,1043.549437,689.420881,0.350908 }
 };
 
-/*static*/ EllipseFrom5PointsTestCases::TestParameters*	EllipseFrom5PointsTestCases::GetTestCase(int i)
+/*static*/const EllipseFrom5PointsTestCases::TestParameters* EllipseFrom5PointsTestCases::GetTestCase(int i)
 {
 	if (i < sizeof(EllipseFrom5PointsTestCases::tests) / sizeof(EllipseFrom5PointsTestCases::tests[0]))
 	{
@@ -91,3 +91,29 @@ EllipseFrom5PointsTestCases::TestParameters EllipseFrom5PointsTestCases::tests[]
 
 	return nullptr;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static double pos1_X[] = { 1191.890202, 1202.992439, 1251.177332, 1290.494167, 1316.046031, 1330.852813, 1352.380307, 1373.278949, 1365.819934, 1390.200345, 1396.257962, 1405.251032, 1408.272274, 1399.518749, 1375.738192, 1354.890642, 1344.181910, 1329.239047, 1291.598685, 1272.002922, 1236.409267, 1193.330425, 1135.603540, 1124.718146, 1058.339563, 1014.500301, 989.403974, 891.826663, 848.007368 };
+static double pos1_Y[] = { 56.850882, 63.318848, 97.576252, 138.239738, 169.077405, 194.235056, 230.361399, 266.815964, 315.499247, 325.761950, 335.514097, 398.074500, 490.640574, 559.419796, 633.170436, 687.140494, 709.254771, 730.149767, 783.886493, 811.988798, 850.083598, 883.423782, 921.829060, 930.230122, 953.948848, 962.635142, 965.784117, 971.813619, 963.767163 };
+
+EllipseLeastSquareFitTestCases::TestCase EllipseLeastSquareFitTestCases::tests[] =
+{
+	{
+		pos1_X,pos1_Y,
+		sizeof(pos1_X) / sizeof(pos1_X[0]),
+		960.44263945130331,486.67764874797450,490.00254257630735,440.87372019871310, -1.2640157348100098
+	}
+};
+
+/*static*/ const EllipseLeastSquareFitTestCases::TestCase* EllipseLeastSquareFitTestCases::GetTestCase(int i)
+{
+	if (i < sizeof(EllipseLeastSquareFitTestCases::tests) / sizeof(EllipseLeastSquareFitTestCases::tests[0]))
+	{
+		return EllipseLeastSquareFitTestCases::tests + i;
+	}
+
+	return nullptr;
+}
+
+

@@ -12,21 +12,32 @@
 
 using namespace EllipseUtils;
 
-static bool IsResultOk(const EllipseFrom5PointsTestCases::TestParameters* ptrTestData, EllipseParameters<double>& ellParams)
+static bool IsResultOk(double result_x0, double result_y0, double result_a, double result_b, double result_theta, EllipseParameters<double>& ellParams,double maxError)
 {
-	const double MaxError = 1e-5;
-	if (relativeDifference(ptrTestData->result_x0, ellParams.x0) < MaxError && relativeDifference(ptrTestData->result_y0, ellParams.y0) < MaxError &&
-		relativeDifference(ptrTestData->result_a, ellParams.a) < MaxError && relativeDifference(ptrTestData->result_b, ellParams.b) < MaxError)
+	if (relativeDifference(result_x0, ellParams.x0) < maxError && relativeDifference(result_y0, ellParams.y0) < maxError &&
+		relativeDifference(result_a, ellParams.a) < maxError && relativeDifference(result_b, ellParams.b) < maxError)
 	{
-		if (relativeDifference(ptrTestData->result_theta, ellParams.theta) < MaxError ||
-			relativeDifference(ptrTestData->result_theta + M_PI, ellParams.theta) < MaxError ||
-			relativeDifference(ptrTestData->result_theta - M_PI, ellParams.theta) < MaxError)
+		if (relativeDifference(result_theta, ellParams.theta) < maxError ||
+			relativeDifference(result_theta + M_PI, ellParams.theta) < maxError ||
+			relativeDifference(result_theta - M_PI, ellParams.theta) < maxError)
 		{
 			return true;
 		}
 	}
 
 	return false;
+}
+
+static bool IsResultOk(const EllipseFrom5PointsTestCases::TestParameters* ptrTestData, EllipseParameters<double>& ellParams)
+{
+	const double MaxError = 1e-5;
+	return IsResultOk(ptrTestData->result_x0, ptrTestData->result_y0, ptrTestData->result_a, ptrTestData->result_b, ptrTestData->result_theta, ellParams, MaxError);
+}
+
+static bool IsResultOk(const EllipseLeastSquareFitTestCases::TestCase* ptrTestCaseData, EllipseParameters<double>& ellParams)
+{
+	const double MaxError = 1e-5;
+	return IsResultOk(ptrTestCaseData->result_x0, ptrTestCaseData->result_y0, ptrTestCaseData->result_a, ptrTestCaseData->result_b, ptrTestCaseData->result_theta, ellParams, MaxError);
 }
 
 static std::string GenerateFilenameForSvg(const char* szFilename, int i)
@@ -105,18 +116,38 @@ static bool TestEllipseFrom5Points(const char* szFilename)
 }
 
 
-static void TestLeastSquareFit()
+static bool TestLeastSquareFit()
 {
-	std::vector<double> posX{ 1191.890202, 1202.992439, 1251.177332, 1290.494167, 1316.046031, 1330.852813, 1352.380307, 1373.278949, 1365.819934, 1390.200345, 1396.257962, 1405.251032, 1408.272274, 1399.518749, 1375.738192, 1354.890642, 1344.181910, 1329.239047, 1291.598685, 1272.002922, 1236.409267, 1193.330425, 1135.603540, 1124.718146, 1058.339563, 1014.500301, 989.403974, 891.826663, 848.007368 };
-	std::vector<double> posY{ 56.850882, 63.318848, 97.576252, 138.239738, 169.077405, 194.235056, 230.361399, 266.815964, 315.499247, 325.761950, 335.514097, 398.074500, 490.640574, 559.419796, 633.170436, 687.140494, 709.254771, 730.149767, 783.886493, 811.988798, 850.083598, 883.423782, 921.829060, 930.230122, 953.948848, 962.635142, 965.784117, 971.813619, 963.767163 };
-	
-	LeastSquareEllipseFitter<double>::PointAccessorFromTwoVectors accessor(posX, posY);
-	auto result = LeastSquareEllipseFitter<double>::Fit(accessor);
+	//std::vector<double> posX{ 1191.890202, 1202.992439, 1251.177332, 1290.494167, 1316.046031, 1330.852813, 1352.380307, 1373.278949, 1365.819934, 1390.200345, 1396.257962, 1405.251032, 1408.272274, 1399.518749, 1375.738192, 1354.890642, 1344.181910, 1329.239047, 1291.598685, 1272.002922, 1236.409267, 1193.330425, 1135.603540, 1124.718146, 1058.339563, 1014.500301, 989.403974, 891.826663, 848.007368 };
+	//std::vector<double> posY{ 56.850882, 63.318848, 97.576252, 138.239738, 169.077405, 194.235056, 230.361399, 266.815964, 315.499247, 325.761950, 335.514097, 398.074500, 490.640574, 559.419796, 633.170436, 687.140494, 709.254771, 730.149767, 783.886493, 811.988798, 850.083598, 883.423782, 921.829060, 930.230122, 953.948848, 962.635142, 965.784117, 971.813619, 963.767163 };
+	bool allOk = true;
+	for (int i = 0;; ++i)
+	{
+		auto testParams = EllipseLeastSquareFitTestCases::GetTestCase(i);
+		if (testParams == nullptr)
+		{
+			break;
+		}
+
+		LeastSquareEllipseFitter<double>::PointAccessorFromTwoArrays accessor(testParams->pX, testParams->pY, testParams->count);
+		auto result = LeastSquareEllipseFitter<double>::Fit(accessor);
+		EllipseParameters<double> ellParams = EllipseParameters<double>::FromAlgebraicParameters(result);
+
+		bool isOk = IsResultOk(testParams, ellParams);
+		printf("x0=%lf y0=%lf a=%lf b=%lf angle=%lf <- %s\n", ellParams.x0, ellParams.y0, ellParams.a, ellParams.b, radToDegree(ellParams.theta), isOk ? "OK" : "FAIL");
+
+		if (!isOk)
+		{
+			allOk = false;
+		}
+	}
+
+	return allOk;
 }
 
 
 static const char* _5POINTTESTOPTION = "5pointtest";
-static const char* LEASTSQUAREELLIPSETESTOPTION = "leastsquarefit";
+static const char* LEASTSQUAREELLIPSETESTOPTION = "leastsquarefittest";
 
 static option::ArgStatus CommandArgRequired(const option::Option& option, bool msg)
 {

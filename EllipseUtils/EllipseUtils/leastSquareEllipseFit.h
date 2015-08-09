@@ -35,6 +35,34 @@ namespace EllipseUtils
 			}
 		};
 
+		class PointAccessorFromTwoArrays
+		{
+		private:
+			const double* ptrX;
+			const double* ptrY;
+			size_t count;
+		public:
+			PointAccessorFromTwoArrays(const double* ptrX, const double* ptrY,size_t count)
+				: ptrX(ptrX),ptrY(ptrY),count(count)
+			{}
+
+
+			size_t GetLength() const
+			{
+				return this->count;
+			}
+
+			tFloat GetX(size_t index) const
+			{
+				return this->ptrX[index];
+			}
+
+			tFloat GetY(size_t index) const
+			{
+				return this->ptrY[index];
+			}
+		};
+
 		template <typename PointAccessor>
 		static EllipseAlgebraicParameters<tFloat> Fit(const PointAccessor& ptAccessor)
 		{
