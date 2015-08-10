@@ -12,7 +12,7 @@
 
 using namespace EllipseUtils;
 
-static bool IsResultOk(double result_x0, double result_y0, double result_a, double result_b, double result_theta, EllipseParameters<double>& ellParams,double maxError)
+static bool IsResultOk(double result_x0, double result_y0, double result_a, double result_b, double result_theta, EllipseParameters<double>& ellParams, double maxError)
 {
 	if (relativeDifference(result_x0, ellParams.x0) < maxError && relativeDifference(result_y0, ellParams.y0) < maxError &&
 		relativeDifference(result_a, ellParams.a) < maxError && relativeDifference(result_b, ellParams.b) < maxError)
@@ -144,16 +144,72 @@ static bool TestLeastSquareFit()
 	return allOk;
 }
 
+static void LoadFile(const char* szFilename, std::vector<double>& xPoints, std::vector<double>& yPoints)
+{
+	std::ifstream read;
+	read.open(szFilename);
+	if (!read.is_open())
+	{
+		throw std::exception("Couldn't open file.");
+	}
+
+	std::string line;
+	while (std::getline(read, line))
+	{
+		double x, y;
+		if (sscanf_s(line.c_str(), "%lf %lf", &x, &y) == 2)
+		{
+			xPoints.push_back(x);
+			yPoints.push_back(y);
+		}
+	}
+
+	read.close();
+}
+
+static void LeastSquareFileFromFile(const char* szFilename, const char* svgOutputFilename)
+{
+	std::vector<double> xPoints; std::vector<double> yPoints;
+	LoadFile(szFilename, xPoints, yPoints);
+
+	LeastSquareEllipseFitter<double>::PointAccessorFromTwoVectors accessor(xPoints, yPoints);
+	auto result = LeastSquareEllipseFitter<double>::Fit(accessor);
+	EllipseParameters<double> ellParams = EllipseParameters<double>::FromAlgebraicParameters(result);
+
+	int x = ellParams.x0 - (std::max)(ellParams.a, ellParams.b);
+	int y = ellParams.y0 - (std::max)(ellParams.a, ellParams.b);
+	int w, h;
+	w = h = 2 * (std::max)(ellParams.a, ellParams.b);
+
+	int count = 0;
+	write_svg_points_and_ellipse(
+		svgOutputFilename,
+		x, y, w, h,
+		[&](double& x, double& y)->bool
+	{
+		if (count < xPoints.size())
+		{
+			x = xPoints[count];
+			y = yPoints[count];
+			++count;
+			return true;
+		}
+		return false;
+	},
+		ellParams.x0, ellParams.y0, ellParams.a, ellParams.b, ellParams.theta);
+}
 
 static const char* _5POINTTESTOPTION = "5pointtest";
 static const char* LEASTSQUAREELLIPSETESTOPTION = "leastsquarefittest";
+static const char* LEASTSQUAREELLIPSEOPTION = "leastsquarefit";
 
 static option::ArgStatus CommandArgRequired(const option::Option& option, bool msg)
 {
 	if (option.arg != 0)
 	{
 		if (strcmp(option.arg, _5POINTTESTOPTION) == 0 ||
-			strcmp(option.arg, LEASTSQUAREELLIPSETESTOPTION) == 0)
+			strcmp(option.arg, LEASTSQUAREELLIPSETESTOPTION) == 0 ||
+			strcmp(option.arg, LEASTSQUAREELLIPSEOPTION) == 0)
 		{
 			return option::ARG_OK;
 		}
@@ -172,7 +228,7 @@ static option::ArgStatus FilenameArgRequired(const option::Option& option, bool 
 	return option::ARG_ILLEGAL;
 }
 
-enum  optionIndex { UNKNOWN, HELP, COMMAND, SVGOUTPUT };
+enum  optionIndex { UNKNOWN, HELP, COMMAND, SVGOUTPUT, POINTSINPUTFILE };
 const option::Descriptor usage[] =
 {
 	{ UNKNOWN, 0,"" , ""    ,option::Arg::None, "USAGE: example [options]\n\n"
@@ -180,6 +236,7 @@ const option::Descriptor usage[] =
 	{ HELP,    0,"" , "help",option::Arg::None, "  --help  \tPrint usage and exit." },
 	{ COMMAND,    0,"c", "command",CommandArgRequired, "  --command, -c  \tspecifies command." },
 	{ SVGOUTPUT,  0,"s" ,  "svg"   ,FilenameArgRequired, "  --svg, -s  \tspecifies filename for SVG-output." },
+	{ POINTSINPUTFILE,  0,"p" ,  "points"   ,FilenameArgRequired, "  --points, -p  \tspecifies filename with list of points" },
 	{ 0,0,0,0,0,0 }
 };
 
@@ -212,6 +269,23 @@ int main(int argc, char* argv[])
 	else if (strcmp(command, LEASTSQUAREELLIPSETESTOPTION) == 0)
 	{
 		TestLeastSquareFit();
+	}
+	else if (strcmp(command, LEASTSQUAREELLIPSEOPTION) == 0)
+	{
+		const char* filename = nullptr;
+		if (options[POINTSINPUTFILE])
+		{
+			filename = options[POINTSINPUTFILE].arg;
+		}
+
+		const char* svgoutputfilename = nullptr;
+		if (options[SVGOUTPUT])
+		{
+			svgoutputfilename = options[SVGOUTPUT].arg;
+		}
+
+
+		LeastSquareFileFromFile(filename, svgoutputfilename);
 	}
 
 

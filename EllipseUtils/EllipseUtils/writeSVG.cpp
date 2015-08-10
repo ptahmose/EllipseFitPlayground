@@ -65,3 +65,50 @@ void write_svg_five_points_and_ellipse(const char* szFilename, int xsize, int ys
 	if (svg != stdout && fclose(svg) == EOF)
 		throw std::logic_error("Error: unable to close file while writing SVG file.");
 }
+
+void write_svg_points_and_ellipse(const char* szFilename, int viewBoxX, int viewBoxY, int viewBoxW, int viewBoxH, std::function<bool(double&, double&)> getPoints, double x0, double y0, double a, double b, double theta)
+{
+	FILE * svg;
+
+	/* open file */
+	if (fopen_s(&svg, szFilename, "w") != 0)
+	{
+		throw std::logic_error("Error: unable to open SVG output file.");
+	}
+
+	/* write SVG header */
+	fprintf(svg, "<?xml version=\"1.0\" standalone=\"no\"?>\n");
+	fprintf(svg, "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n");
+	fprintf(svg, " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
+	fprintf(svg, "<svg  viewBox=\"%i %i %i %i\" ", viewBoxX, viewBoxY, viewBoxW, viewBoxH);
+	fprintf(svg, "version=\"1.1\"\n xmlns=\"http://www.w3.org/2000/svg\" ");
+	fprintf(svg, "xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
+
+	/* write line segments */
+	const double radiusPoint = 2;
+	for (;;)
+	{
+		double x, y;
+		bool b = getPoints(x, y);
+		if (b == false)
+		{
+			break;
+		}
+
+		fprintf(svg, "<circle cx=\"%f\" cy=\"%f\" r=\"%f\" fill=\"black\" />\n", x, y, radiusPoint);
+	}
+
+	fprintf(svg,
+		"<g transform=\"translate(%lf %lf)  rotate(%lf)\">\n"
+		"<ellipse cx=\"%lf\" cy= \"%lf\" rx=\"%lf\" ry=\"%lf\" fill=\"none\" stroke=\"purple\" stroke-width=\"3\" />\n"
+		"</g>\n",
+		x0, y0,
+		180 * theta / M_PI,
+		0.0, 0.0, a, b);
+
+
+		/* close SVG file */
+		fprintf(svg, "</svg>\n");
+		if (svg != stdout && fclose(svg) == EOF)
+			throw std::logic_error("Error: unable to close file while writing SVG file.");
+}
